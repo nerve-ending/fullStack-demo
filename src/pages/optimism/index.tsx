@@ -2,7 +2,53 @@ import * as React from "react";
 import * as styles from "./index.module.css";
 import { StaticImage } from "gatsby-plugin-image";
 
+const CATEGORIES = {
+  "忽略正面（Ignoring the Positive）": "#3b82f6",
+
+  "过度一般化（Overgeneralization）": "#16a34a",
+
+  "过于悲观（Catastrophizing）": "#ef4444",
+
+  "情感化推理（Emotional Reasoning）": "#eab308",
+
+  "过度悲观（Overly Pessimistic）": "#14b8a6",
+
+  "黑白思维（All-or-Nothing Thinking）": "#f97316",
+
+  "过度个人化（Personalization）": "#8b5cf6",
+};
+
 export default function Optimism() {
+  const [hidden, setHidden] = React.useState(true);
+  const [dataArray, setDataArray] = React.useState([]);
+
+  React.useEffect(() => {
+    async function loadFacts() {
+      const res = await fetch(
+        "https://vvgmvpuzmopcasdkbmol.supabase.co/rest/v1/words",
+        {
+          headers: {
+            apikey:
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2Z212cHV6bW9wY2FzZGtibW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDM1NzY3MzcsImV4cCI6MjAxOTE1MjczN30.T_x4J2uX2lJgyvXxv6dquFkMvcD743-ZR1ZKBuzI4HE",
+            authorization:
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2Z212cHV6bW9wY2FzZGtibW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDM1NzY3MzcsImV4cCI6MjAxOTE1MjczN30.T_x4J2uX2lJgyvXxv6dquFkMvcD743-ZR1ZKBuzI4HE",
+          },
+        }
+      );
+      const data = await res.json();
+      setDataArray(data);
+    }
+    loadFacts();
+  }, []);
+
+  function handleClick() {
+    if (hidden) {
+      setHidden(false);
+    } else {
+      setHidden(true);
+    }
+  }
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -13,106 +59,99 @@ export default function Optimism() {
           />
           <h1>Today I Learned</h1>
         </div>
-        <button>分享一个事实</button>
-        {/* {<p>{posts}</p>} */}
-      </header>
-
-      <form className={styles.factForm}>
-        <input type="text" placeholder="与世界分享一个事实" />
-        <span>200</span>
-        <input type="text" />
-        <select name="" id="">
-          <option value="">选择类别:</option>
-          <option value="technology">Technology</option>
-          <option value="science">Science</option>
-          <option value="finance">Finance</option>
-        </select>
         <button
           className={`${styles.btn} ${styles.btnLarge} ${styles.btnOpen}`}
+          onClick={() => {
+            handleClick();
+          }}
         >
-          Post
+          {hidden ? "share a fact" : "close"}
         </button>
-      </form>
+      </header>
+
+      {!hidden && (
+        <form className={styles.factForm}>
+          <input type="text" placeholder="与世界分享一个事实" />
+          <span>200</span>
+          <input type="text" />
+          <select name="" id="">
+            <option value="">选择类别:</option>
+            <option value="technology">Technology</option>
+            <option value="science">Science</option>
+            <option value="finance">Finance</option>
+          </select>
+          <button
+            className={`${styles.btn} ${styles.btnLarge} ${styles.btnOpen}`}
+          >
+            Post
+          </button>
+        </form>
+      )}
 
       <main className={styles.main}>
         <aside>
           <ul>
-            <li className={styles.category}>
-              <button className={`${styles.btn} ${styles.btnAllCategories}`}>
-                All
-              </button>
-            </li>
-            <li className={styles.category}>
-              <button
-                className={`${styles.btn} ${styles.btnCategory}`}
-                style={{ backgroundColor: "#3b82f6" }}
-              >
-                Technology
-              </button>
-            </li>
-            <li className={styles.category}>
-              <button
-                className={`${styles.btn} ${styles.btnCategory}`}
-                style={{ backgroundColor: "#16a34a" }}
-              >
-                Science
-              </button>
-            </li>
+            {Object.keys(CATEGORIES).map((item: any) => {
+              return (
+                <li className={styles.category}>
+                  <button
+                    className={`${styles.btn} ${styles.btnCategory}`}
+                    // @ts-ignore
+                    style={{ backgroundColor: CATEGORIES[item] }}
+                  >
+                    {item}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </aside>
 
         <section>
           <ul>
-            <li className={styles.fact}>
-              <p>
-                React is being developed by Google(formerly facebook)
-                <a
-                  className={styles.source}
-                  href="https://www.taobao.com/"
-                  target="_blank"
-                >
-                  (Source)
-                </a>
-              </p>
+            {dataArray.length > 0 &&
+              dataArray.map((item) => {
+                const {
+                  id,
+                  text,
+                  source,
+                  category,
+                  votesInteresting,
+                  votesMindblowing,
+                  votesFalse,
+                } = item;
+                return (
+                  <li key={id} className={styles.fact}>
+                    <p>
+                      {text}
+                      <a
+                        className={styles.source}
+                        href="https://www.taobao.com/"
+                        target="_blank"
+                      >
+                        {`(${source})`}
+                      </a>
+                    </p>
 
-              <span
-                className={styles.tag}
-                style={{ backgroundColor: "#3b82f6" }}
-              >
-                technology
-              </span>
-              <div className={styles.voteButtons}>
-                <button>👍 24</button>
-                <button>😳 9</button>
-                <button>⛔ 4</button>
-              </div>
-            </li>
-            <li className={styles.fact}>
-              <p>
-                React is being developed by Google(formerly facebook)
-                <a
-                  className={styles.source}
-                  href="https://www.taobao.com/"
-                  target="_blank"
-                >
-                  (Source)
-                </a>
-              </p>
-
-              <span
-                className={styles.tag}
-                style={{ backgroundColor: "#eab308" }}
-              >
-                society
-              </span>
-              <div className={styles.voteButtons}>
-                <button>👍 11</button>
-                <button>😳 2</button>
-                <button>⛔ 0</button>
-              </div>
-            </li>
+                    <span
+                      className={styles.tag}
+                      style={{
+                        backgroundColor:
+                          (category && CATEGORIES[category]) || "#000",
+                      }}
+                    >
+                      {category}
+                    </span>
+                    <div className={styles.voteButtons}>
+                      <button>👍 {votesInteresting}</button>
+                      <button>😳 {votesMindblowing}</button>
+                      <button>⛔ {votesFalse}</button>
+                    </div>
+                  </li>
+                );
+              })}
           </ul>
-          <p>Build by Jonas</p>
+          <p>Build by zdl</p>
         </section>
       </main>
     </div>

@@ -21,6 +21,11 @@ const CATEGORIES = {
 export default function Optimism() {
   const [hidden, setHidden] = React.useState(true);
   const [dataArray, setDataArray] = React.useState([]);
+  const [text, setText] = React.useState("");
+  const [category, setCategory] = React.useState(
+    "情感化推理（Emotional Reasoning）"
+  );
+  const [source, setSource] = React.useState("");
 
   React.useEffect(() => {
     async function loadFacts() {
@@ -71,14 +76,33 @@ export default function Optimism() {
 
       {!hidden && (
         <form className={styles.factForm}>
-          <input type="text" placeholder="与世界分享一个事实" />
+          <input
+            type="text"
+            placeholder="与世界分享一个事实"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
           <span>200</span>
-          <input type="text" />
-          <select name="" id="">
-            <option value="">选择类别:</option>
-            <option value="technology">Technology</option>
-            <option value="science">Science</option>
-            <option value="finance">Finance</option>
+          <input
+            type="text"
+            placeholder="Trustworthy source..."
+            value={source}
+            onChange={(e) => setSource(e.target.value)}
+          />
+          <select
+            name=""
+            id=""
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="finance">Choose category</option>
+            {Object.keys(CATEGORIES).map((item) => {
+              return (
+                <option key={item} value={item}>
+                  {item.toUpperCase()}
+                </option>
+              );
+            })}
           </select>
           <button
             className={`${styles.btn} ${styles.btnLarge} ${styles.btnOpen}`}
@@ -93,7 +117,7 @@ export default function Optimism() {
           <ul>
             {Object.keys(CATEGORIES).map((item: any) => {
               return (
-                <li className={styles.category}>
+                <li key={item} className={styles.category}>
                   <button
                     className={`${styles.btn} ${styles.btnCategory}`}
                     // @ts-ignore

@@ -1,0 +1,30 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #292524;
+  color: #fafaf9;
+  font-family: "Sono", sans-serif;
+  padding: 48px 64px;
+}
+
+@media (max-width: 1000px) {
+  body {
+    padding: 32px 48px;
+  }
+}
+
+h1 {
+  font-size: 48px;
+  text-transform: uppercase;
+  text-align: center;
+  font-family: "Coiny", sans-serif;
+  margin-top: 12px;
+}
+
+ul {
+  list-style: none;
+}

@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as styles from "./index.module.css";
 import { StaticImage } from "gatsby-plugin-image";
+import supabase from "../../supabase.js";
 
 const CATEGORIES = {
   "忽略正面（Ignoring the Positive）": "#3b82f6",
@@ -18,6 +19,16 @@ const CATEGORIES = {
   "过度个人化（Personalization）": "#8b5cf6",
 };
 
+function isValidHttpUrl(string: string) {
+  let url;
+  try {
+    url = new URL(string);
+  } catch (_) {
+    return false;
+  }
+  return url.protocol === "http:" || url.protocol === "https:";
+}
+
 export default function Optimism() {
   const [hidden, setHidden] = React.useState(true);
   const [dataArray, setDataArray] = React.useState([]);
@@ -25,31 +36,59 @@ export default function Optimism() {
   const [category, setCategory] = React.useState(
     "情感化推理（Emotional Reasoning）"
   );
-  const [source, setSource] = React.useState("");
+  const [source, setSource] = React.useState("http://example.com");
+  const textLength = text.length;
+  const [facts, setFacts] = React.useState<any>([]);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [currentCategory, setCurrentCategory] = React.useState("all");
+  const [isUpLoading, setIsUpLoading] = React.useState(false);
 
   React.useEffect(() => {
     async function loadFacts() {
-      const res = await fetch(
-        "https://vvgmvpuzmopcasdkbmol.supabase.co/rest/v1/words",
-        {
-          headers: {
-            apikey:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2Z212cHV6bW9wY2FzZGtibW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDM1NzY3MzcsImV4cCI6MjAxOTE1MjczN30.T_x4J2uX2lJgyvXxv6dquFkMvcD743-ZR1ZKBuzI4HE",
-            authorization:
-              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2Z212cHV6bW9wY2FzZGtibW9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDM1NzY3MzcsImV4cCI6MjAxOTE1MjczN30.T_x4J2uX2lJgyvXxv6dquFkMvcD743-ZR1ZKBuzI4HE",
-          },
-        }
-      );
-      const data = await res.json();
-      setDataArray(data);
+      setIsLoading(true);
+
+      let query = supabase.from("words").select("*");
+
+      if (currentCategory !== "all") {
+        query = query.eq("category", currentCategory);
+      }
+      const { data: facts, error } = await query
+        .order("votesInteresting", { ascending: false })
+        .limit(1000);
+      if (!error) {
+        setDataArray(facts);
+      } else alert("数据获取失败...");
+      setIsLoading(false);
     }
     loadFacts();
-  }, []);
+  }, [currentCategory]);
 
   function handleClick() {
     if (hidden) {
       setHidden(false);
     } else {
+      setHidden(true);
+    }
+  }
+
+  async function handleSubmit(e: any) {
+    e.preventDefault();
+
+    if (text && isValidHttpUrl(source) && category && textLength <= 200) {
+      setIsUpLoading(true);
+
+      const { data: newFact, error } = await supabase
+        .from("words")
+        .insert([{ text, source, category }])
+        .select();
+      setIsUpLoading(false);
+
+      setFacts((facts: any) => [newFact[0], ...facts]);
+
+      setText("");
+      setSource("");
+      setCategory("");
+
       setHidden(true);
     }
   }
@@ -75,25 +114,30 @@ export default function Optimism() {
       </header>
 
       {!hidden && (
-        <form className={styles.factForm}>
+        <form className={styles.factForm} onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="与世界分享一个事实"
             value={text}
             onChange={(e) => setText(e.target.value)}
+            disabled={isUpLoading}
           />
-          <span>200</span>
+          <span>{200 - textLength}</span>
           <input
             type="text"
             placeholder="Trustworthy source..."
             value={source}
-            onChange={(e) => setSource(e.target.value)}
+            onChange={(e: { target: { value: any } }) =>
+              setSource(e.target.value)
+            }
+            disabled={isUpLoading}
           />
           <select
             name=""
             id=""
             value={category}
             onChange={(e) => setCategory(e.target.value)}
+            disabled={isUpLoading}
           >
             <option value="finance">Choose category</option>
             {Object.keys(CATEGORIES).map((item) => {
@@ -106,78 +150,96 @@ export default function Optimism() {
           </select>
           <button
             className={`${styles.btn} ${styles.btnLarge} ${styles.btnOpen}`}
+            disabled={isUpLoading}
           >
             Post
           </button>
         </form>
       )}
 
-      <main className={styles.main}>
-        <aside>
-          <ul>
-            {Object.keys(CATEGORIES).map((item: any) => {
-              return (
-                <li key={item} className={styles.category}>
-                  <button
-                    className={`${styles.btn} ${styles.btnCategory}`}
-                    // @ts-ignore
-                    style={{ backgroundColor: CATEGORIES[item] }}
-                  >
-                    {item}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </aside>
-
-        <section>
-          <ul>
-            {dataArray.length > 0 &&
-              dataArray.map((item) => {
-                const {
-                  id,
-                  text,
-                  source,
-                  category,
-                  votesInteresting,
-                  votesMindblowing,
-                  votesFalse,
-                } = item;
+      {isLoading ? (
+        <p className={styles.message}>Loading...</p>
+      ) : (
+        <main className={styles.main}>
+          <aside>
+            <ul>
+              <li
+                className={styles.category}
+                onClick={() => setCurrentCategory("all")}
+              >
+                <button className={`${styles.btn} ${styles.btnAllCategories}`}>
+                  All
+                </button>
+              </li>
+              {Object.keys(CATEGORIES).map((item: any) => {
                 return (
-                  <li key={id} className={styles.fact}>
-                    <p>
-                      {text}
-                      <a
-                        className={styles.source}
-                        href="https://www.taobao.com/"
-                        target="_blank"
-                      >
-                        {`(${source})`}
-                      </a>
-                    </p>
-
-                    <span
-                      className={styles.tag}
-                      style={{
-                        backgroundColor:
-                          (category && CATEGORIES[category]) || "#000",
-                      }}
+                  <li key={item} className={styles.category}>
+                    <button
+                      className={`${styles.btn} ${styles.btnCategory}`}
+                      // @ts-ignore
+                      style={{ backgroundColor: CATEGORIES[item] }}
+                      onClick={() => setCurrentCategory(item)}
                     >
-                      {category}
-                    </span>
-                    <div className={styles.voteButtons}>
-                      <button>👍 {votesInteresting}</button>
-                      <button>😳 {votesMindblowing}</button>
-                      <button>⛔ {votesFalse}</button>
-                    </div>
+                      {item}
+                    </button>
                   </li>
                 );
               })}
-          </ul>
-          <p>Build by zdl</p>
-        </section>
-      </main>
+            </ul>
+          </aside>
+
+          {dataArray.length === 0 ? (
+            <p className={styles.message}>分类下没有facts，创建一个吧✌</p>
+          ) : (
+            <section>
+              <ul>
+                {dataArray.length > 0 &&
+                  dataArray.map((item) => {
+                    const {
+                      id,
+                      text,
+                      source,
+                      category,
+                      votesInteresting,
+                      votesMindblowing,
+                      votesFalse,
+                    } = item;
+                    return (
+                      <li key={id} className={styles.fact}>
+                        <p>
+                          {text}
+                          <a
+                            className={styles.source}
+                            href="https://www.taobao.com/"
+                            target="_blank"
+                          >
+                            {`(${source})`}
+                          </a>
+                        </p>
+
+                        <span
+                          className={styles.tag}
+                          style={{
+                            backgroundColor:
+                              (category && CATEGORIES[category]) || "#000",
+                          }}
+                        >
+                          {category}
+                        </span>
+                        <div className={styles.voteButtons}>
+                          <button>👍 {votesInteresting}</button>
+                          <button>😳 {votesMindblowing}</button>
+                          <button>⛔ {votesFalse}</button>
+                        </div>
+                      </li>
+                    );
+                  })}
+              </ul>
+              <p>Build by zdl</p>
+            </section>
+          )}
+        </main>
+      )}
     </div>
   );
 }

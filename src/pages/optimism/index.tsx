@@ -42,6 +42,7 @@ export default function Optimism() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [currentCategory, setCurrentCategory] = React.useState("all");
   const [isUpLoading, setIsUpLoading] = React.useState(false);
+  const [isUpdating, setIsUpdating] = React.useState(false);
 
   React.useEffect(() => {
     async function loadFacts() {
@@ -68,6 +69,24 @@ export default function Optimism() {
       setHidden(false);
     } else {
       setHidden(true);
+    }
+  }
+
+  async function handleVote(item: any) {
+    setIsUpdating(true);
+    const { data: updatedFact, error } = await supabase
+      .from("words")
+      .update({ votesInteresting: item.votesInteresting + 1 })
+      .eq("id", item.id)
+      .select();
+    setIsUpdating(false);
+
+    if (!error) {
+      setDataArray((words: any) => {
+        return words.map((f: any) =>
+          f.id === item.id ? updatedFact[0] : f
+        ) as any;
+      });
     }
   }
 
@@ -164,6 +183,7 @@ export default function Optimism() {
           <aside>
             <ul>
               <li
+                key="all"
                 className={styles.category}
                 onClick={() => setCurrentCategory("all")}
               >
@@ -227,7 +247,12 @@ export default function Optimism() {
                           {category}
                         </span>
                         <div className={styles.voteButtons}>
-                          <button>👍 {votesInteresting}</button>
+                          <button
+                            onClick={() => handleVote(item)}
+                            disabled={isUpdating}
+                          >
+                            👍 {votesInteresting}
+                          </button>
                           <button>😳 {votesMindblowing}</button>
                           <button>⛔ {votesFalse}</button>
                         </div>

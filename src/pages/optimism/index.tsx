@@ -90,6 +90,42 @@ export default function Optimism() {
     }
   }
 
+  async function handleVoteFalse(item: any) {
+    setIsUpLoading(true);
+    const { data: updatedFact, error } = await supabase
+      .from("words")
+      .update({ votesFalse: item.votesFalse + 1 })
+      .eq("id", item.id)
+      .select();
+    setIsLoading(false);
+
+    if (!error) {
+      setDataArray((words: any) => {
+        return words.map((f: any) =>
+          f.id === item.id ? updatedFact[0] : f
+        ) as any;
+      });
+    }
+  }
+
+  async function handleMindBlow(item: any) {
+    setIsUpLoading(true);
+    const { data: updatedFact, error } = await supabase
+      .from("words")
+      .update({ votesMindblowing: item.votesMindblowing + 1 })
+      .eq("id", item.id)
+      .select();
+    setIsLoading(false);
+
+    if (!error) {
+      setDataArray((words: any) => {
+        return words.map((f: any) =>
+          f.id === item.id ? updatedFact[0] : f
+        ) as any;
+      });
+    }
+  }
+
   async function handleSubmit(e: any) {
     e.preventDefault();
 
@@ -253,8 +289,18 @@ export default function Optimism() {
                           >
                             👍 {votesInteresting}
                           </button>
-                          <button>😳 {votesMindblowing}</button>
-                          <button>⛔ {votesFalse}</button>
+                          <button
+                            onClick={() => handleMindBlow(item)}
+                            disabled={isUpdating}
+                          >
+                            😳 {votesMindblowing}
+                          </button>
+                          <button
+                            onClick={() => handleVoteFalse(item)}
+                            disabled={isUpdating}
+                          >
+                            ⛔ {votesFalse}
+                          </button>
                         </div>
                       </li>
                     );

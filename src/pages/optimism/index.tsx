@@ -260,9 +260,14 @@ export default function Optimism() {
                       votesMindblowing,
                       votesFalse,
                     } = item;
+                    const isDisputed =
+                      votesInteresting + votesMindblowing < votesFalse;
                     return (
                       <li key={id} className={styles.fact}>
                         <p>
+                          {isDisputed ? (
+                            <span className={styles.disputed}>[⛔ 争议]</span>
+                          ) : null}
                           {text}
                           <a
                             className={styles.source}

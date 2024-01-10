@@ -197,3 +197,9 @@
   font-weight: 600;
   margin-top: 24px;
 }
+
+.disputed {
+  color: #ef4444;
+  font-weight: 600;
+  margin-right: 10px;
+}

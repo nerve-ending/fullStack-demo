@@ -162,8 +162,15 @@ export default function Optimism() {
     <div className={styles.container}>
       <header className={styles.header}>
         <div className={styles.logo}>
-          <StaticImage src="../../images/purple-eye.png" alt="Talk Talk" />
-          <h1>Talk Talk</h1>
+          <StaticImage
+            src="../../images/purple-eye.png"
+            alt="Talk Talk"
+            width={88}
+            height={88}
+          />
+          <div className={styles.talk}>
+            <h1>Talk Talk</h1>
+          </div>
         </div>
         <button
           className={`${styles.btnShare} ${styles.btnLarge} ${styles.btnOpen}`}

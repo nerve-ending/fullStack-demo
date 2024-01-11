@@ -1,23 +1,36 @@
 import * as React from "react";
-import * as styles from "./index.module.css";
+import * as styles from "./index.module.scss";
 import { StaticImage } from "gatsby-plugin-image";
 import supabase from "../../supabase.js";
 
-const CATEGORIES = {
-  "忽略正面（Ignoring the Positive）": "#3b82f6",
+const CATEGORIES: any = {
+  黑白思维: "#3b82f6",
 
-  "过度一般化（Overgeneralization）": "#16a34a",
+  等差数列概括: "#16a34a",
 
-  "过于悲观（Catastrophizing）": "#ef4444",
+  消极有色眼镜: "#ef4444",
 
-  "情感化推理（Emotional Reasoning）": "#eab308",
+  贬损自己优点: "#eab308",
 
-  "过度悲观（Overly Pessimistic）": "#14b8a6",
+  结果验证: "#14b8a6",
 
-  "黑白思维（All-or-Nothing Thinking）": "#f97316",
+  应该陈述: "#f97316",
 
-  "过度个人化（Personalization）": "#8b5cf6",
+  归己化: "#8b5cf6",
 };
+
+// const CATEGORIES = {
+//   要么一切要么全无: "#002FA7",
+//   过于概括: "#81D8CF",
+//   心灵过滤: "#003152",
+//   贬损积极: "#B05923",
+//   跳跃式结论: "#E60000",
+//   夸大与夸小: "#900021",
+//   情绪推理: "#FBD26A",
+//   应该陈述: "#8F4B28",
+//   贴标签与标签不当: "#01847F",
+//   归己化: "#40E0D0",
+// };
 
 function isValidHttpUrl(string: string) {
   let url;
@@ -31,14 +44,13 @@ function isValidHttpUrl(string: string) {
 
 export default function Optimism() {
   const [hidden, setHidden] = React.useState(true);
-  const [dataArray, setDataArray] = React.useState([]);
+  const [dataArray, setDataArray] = React.useState<any>([]);
   const [text, setText] = React.useState("");
   const [category, setCategory] = React.useState(
     "情感化推理（Emotional Reasoning）"
   );
   const [source, setSource] = React.useState("http://example.com");
   const textLength = text.length;
-  const [facts, setFacts] = React.useState<any>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [currentCategory, setCurrentCategory] = React.useState("all");
   const [isUpLoading, setIsUpLoading] = React.useState(false);
@@ -138,11 +150,9 @@ export default function Optimism() {
         .select();
       setIsUpLoading(false);
 
-      setFacts((facts: any) => [newFact[0], ...facts]);
+      setDataArray((facts: any) => [newFact[0], ...facts]);
 
       setText("");
-      setSource("");
-      setCategory("");
 
       setHidden(true);
     }
@@ -152,25 +162,23 @@ export default function Optimism() {
     <div className={styles.container}>
       <header className={styles.header}>
         <div className={styles.logo}>
-          <StaticImage
-            src="../../images/instagram.png"
-            alt="Today I Learned Logo"
-          />
-          <h1>Today I Learned</h1>
+          <StaticImage src="../../images/purple-eye.png" alt="Talk Talk" />
+          <h1>Talk Talk</h1>
         </div>
         <button
-          className={`${styles.btn} ${styles.btnLarge} ${styles.btnOpen}`}
+          className={`${styles.btnShare} ${styles.btnLarge} ${styles.btnOpen}`}
           onClick={() => {
             handleClick();
           }}
         >
-          {hidden ? "share a fact" : "close"}
+          {hidden ? "分享一个事实" : "关闭"}
         </button>
       </header>
 
       {!hidden && (
         <form className={styles.factForm} onSubmit={handleSubmit}>
           <input
+            className={styles.shareInput}
             type="text"
             placeholder="与世界分享一个事实"
             value={text}
@@ -179,8 +187,9 @@ export default function Optimism() {
           />
           <span>{200 - textLength}</span>
           <input
+            className={styles.url}
             type="text"
-            placeholder="Trustworthy source..."
+            placeholder="来源"
             value={source}
             onChange={(e: { target: { value: any } }) =>
               setSource(e.target.value)
@@ -188,13 +197,14 @@ export default function Optimism() {
             disabled={isUpLoading}
           />
           <select
+            className={styles.shareInput}
             name=""
             id=""
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             disabled={isUpLoading}
           >
-            <option value="finance">Choose category</option>
+            <option value="finance">选一个类别</option>
             {Object.keys(CATEGORIES).map((item) => {
               return (
                 <option key={item} value={item}>
@@ -204,10 +214,10 @@ export default function Optimism() {
             })}
           </select>
           <button
-            className={`${styles.btn} ${styles.btnLarge} ${styles.btnOpen}`}
+            className={`${styles.btnShare} ${styles.btnLarge} ${styles.btnOpen}`}
             disabled={isUpLoading}
           >
-            Post
+            发布
           </button>
         </form>
       )}
@@ -223,7 +233,9 @@ export default function Optimism() {
                 className={styles.category}
                 onClick={() => setCurrentCategory("all")}
               >
-                <button className={`${styles.btn} ${styles.btnAllCategories}`}>
+                <button
+                  className={`${styles.btnAll} ${styles.btnAllCategories}`}
+                >
                   All
                 </button>
               </li>
@@ -250,11 +262,10 @@ export default function Optimism() {
             <section>
               <ul>
                 {dataArray.length > 0 &&
-                  dataArray.map((item) => {
+                  dataArray.map((item: any) => {
                     const {
                       id,
                       text,
-                      source,
                       category,
                       votesInteresting,
                       votesMindblowing,
@@ -274,7 +285,7 @@ export default function Optimism() {
                             href="https://www.taobao.com/"
                             target="_blank"
                           >
-                            {`(${source})`}
+                            故事
                           </a>
                         </p>
 
@@ -311,7 +322,6 @@ export default function Optimism() {
                     );
                   })}
               </ul>
-              <p>Build by zdl</p>
             </section>
           )}
         </main>

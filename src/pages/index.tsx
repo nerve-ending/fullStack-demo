@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { HeadFC, PageProps } from "gatsby";
 import Optimism from "./optimism/index";
-import "./index.module.css";
+import "./index.module.scss";
 
 const IndexPage: React.FC<PageProps> = () => {
   return <Optimism />;

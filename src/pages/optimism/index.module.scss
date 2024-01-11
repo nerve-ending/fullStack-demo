@@ -24,11 +24,12 @@
 .tag {
   text-transform: uppercase;
   font-size: 14px;
-  font-family: "Coiny", sans-serif;
+  font-family: "youyuan", sans-serif;
   padding-top: 3px;
   padding-right: 10px;
   padding-left: 10px;
   border-radius: 100px;
+  font-weight: 700;
 }
 
 .header {
@@ -97,8 +98,8 @@ section {
 }
 
 .logo img {
-  width: 68px;
-  height: 68px;
+  width: 88px;
+  height: 88px;
 }
 
 .voteButtons {
@@ -159,23 +160,35 @@ section {
 
 .btn {
   border: none;
-  font-family: "Coiny", sans-serif;
+  font-family: "Coiny", "youyuan", sans-serif;
   line-height: 1;
   text-transform: uppercase;
-  font-size: 17px;
+  font-size: 19px;
   padding: 16px 0 13px;
   background-image: linear-gradient(135deg, #3b82f6, #ef4444, #16a34a, #eab308);
   color: inherit;
   border-radius: 100px;
   cursor: pointer;
   transition: 0.3s;
+  font-weight: 600;
 }
+
+.btnAll {
+  @extend .btn;
+  font-weight: 400;
+}
+
+.btnShare {
+  @extend .btn;
+  font-size: 20px;
+}
+
 .btn:hover {
   transform: scale(110%) rotate(-2deg);
 }
 
 .btnLarge {
-  font-size: 20px;
+  // font-size: 20px;
   padding: 20px 32px 17px;
 }
 
@@ -209,4 +222,17 @@ section {
   color: #ef4444;
   font-weight: 600;
   margin-right: 10px;
+}
+
+.shareInput {
+  font-family: "youyuan" !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+}
+
+.url {
+  font-family: "Coiny", "youyuan", sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 100px !important;
+  padding: 12px 12px 8px 12px !important;
 }
